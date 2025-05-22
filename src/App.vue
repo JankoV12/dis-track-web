@@ -1,17 +1,31 @@
-<!-- src/App.vue -->
 <script setup lang="ts">
 import { RouterView } from 'vue-router'
 </script>
 
 <template>
 
-  <nav>
-    <RouterLink to="/" class="navbar-base">
-      <h1>Home</h1>
-    </RouterLink>
-    <RouterLink to="/login" class="navbar-base">
-      <h1>Login</h1>
-    </RouterLink>
+  <nav
+    class="fixed inset-x-0 top-0 flex flex-nowrap w-screen items-center justify-between bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 px-8 py-4 shadow-lg"
+  >
+    <!-- Left side -->
+    <div class="flex items-center space-x-6">
+      <RouterLink
+        to="/"
+        class="text-white font-semibold tracking-wide hover:text-yellow-300 transition-colors"
+      >
+        Home
+      </RouterLink>
+    </div>
+
+    <!-- Right side -->
+    <div class="flex items-center space-x-6">
+      <RouterLink
+        to="/login"
+        class="text-white font-semibold tracking-wide hover:text-yellow-300 transition-colors"
+      >
+        Login
+      </RouterLink>
+    </div>
   </nav>
 
   <div class="router-container" >
@@ -20,31 +34,8 @@ import { RouterView } from 'vue-router'
 </template>
 
 <style lang="css">
-
-nav {
- display: flex;
- align-items: center;
- gap: 1rem;
- background-color: #282828;
- padding: 1rem;
-}
-
-nav .navbar-base {
-  display: inline-block;
-  color: #fff;
-  text-decoration: none;
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
-  transition: background-color 0.2s;
-}
-
-nav .navbar-base:hover {
-  background-color: rgba(255,255,255,0.1);
-}
-
-nav .navbar-base.router-link-active {
-  background-color: rgba(255,255,255,0.2);
-}
+@import "tailwindcss/preflight";
+@tailwind utilities;
 
 .router-container {
   display: flex;
@@ -52,6 +43,7 @@ nav .navbar-base.router-link-active {
   align-items: center;
   min-height: 100vh;
   width: 100%;
+  padding-top: 88px;
 }
 
 .router-container main {
