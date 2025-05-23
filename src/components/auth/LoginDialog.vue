@@ -4,6 +4,7 @@
 
 import axios from 'axios';
 import { useRoute } from 'vue-router'
+import router from '@/router'
 //import dot
 //import { onMounted } from 'vue';
 
@@ -23,28 +24,41 @@ console.log(`${window.location.protocol}//${window.location.host}${route.path}`)
 
 function dcAuth() {
   const redirectUri = `${window.location.protocol}//${window.location.host}${route.path}`;
-  window.location.href = `https://discord.com/oauth2/authorize?client_id=1371932098851639357&response_type=code&redirect_uri=${encodeURIComponent(redirectUri)}&scope=identify`;
+  window.location.href = `https://discord.com/oauth2/authorize?client_id=${import.meta.env.VITE_DISCORD_CLIENT_ID}&response_type=code&redirect_uri=${encodeURIComponent(redirectUri)}&scope=identify`;
 }
 
 async function login(code: string){
   const redirectUri = `${window.location.protocol}//${window.location.host}${route.path}`;
-  const r = await axios.post('https://discord.com/api/v10/oauth2/token', {
-    grant_type: 'authorization_code',
-    code: code,
-    redirect_uri: encodeURIComponent(redirectUri)
-  }, {
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-      'Authorization': `${import.meta.env.VITE_DISCORD_CLIENT_ID} ${import.meta.env.VITE_DISCORD_CLIENT_SECRET}`,
+  try {
+    console.log(encodeURIComponent(redirectUri));
+    const r = await axios.post('https://discord.com/api/v10/oauth2/token', {
+      'client_id': import.meta.env.VITE_DISCORD_CLIENT_ID,
+      'client_secret': import.meta.env.VITE_DISCORD_CLIENT_SECRET,
+      'grant_type': 'authorization_code',
+      'code': code,
+      'redirect_uri': redirectUri
+    }, {
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Accept': 'application/json',
+      }
+    });
+    if(r.status !== 200) {
+      console.error(`${r.status} || ${r.statusText}`);
+      return;
     }
-  });
-  if(r.status !== 200) {
-    console.error(`${r.status} || ${r.statusText}`);
-    return;
+    else{
+      localStorage.setItem('auth_token', r.data.access_token);
+      localStorage.setItem('refresh_token', r.data.refresh_token);
+      router.push('/userInfo');
+    }
   }
-  else{
-    localStorage.setItem('auth_token', r.data.access_token);
-    localStorage.setItem('refresh_token', r.data.refresh_token);
+  catch (error) {
+    if (axios.isAxiosError(error)) {
+      console.error('Error fetching token:', error.response?.data);
+    } else {
+      console.error('Unexpected error:', error);
+    }
   }
 }
 </script>
