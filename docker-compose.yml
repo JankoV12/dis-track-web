@@ -2,14 +2,14 @@ version: "3.8"
 
 services:
   # ---- Production build + serve ----
-  web:
+  dis-bot-web:
     build: .
     ports:
       - "4000:80"
     restart: always
 
   # ---- (Optional) Development service with hot-reload ----
-  dev:
+  dis-bot-web-dev:
     image: node:16-alpine
     working_dir: /app
     volumes:
