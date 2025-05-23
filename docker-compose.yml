@@ -1,0 +1,22 @@
+version: "3.8"
+
+services:
+  # ---- Production build + serve ----
+  web:
+    build: .
+    ports:
+      - "4000:80"
+    restart: always
+
+  # ---- (Optional) Development service with hot-reload ----
+  dev:
+    image: node:16-alpine
+    working_dir: /app
+    volumes:
+      - ./:/app                # sync your local code
+      - /app/node_modules     # avoid overwriting modules
+    ports:
+      - "4001:8080"           # Vue’s dev server default port
+    command: npm run serve    # starts vue-cli-service serve
+    environment:
+      - CHOKIDAR_USEPOLLING=true  # in case filesystem events need polling
