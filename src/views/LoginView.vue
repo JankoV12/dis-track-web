@@ -1,11 +1,14 @@
 <script setup lang="ts">
 
-import LoginScreen from '@/components/LoginScreen.vue'
+import LoginDialog from "@/components/auth/LoginDialog.vue";
 </script>
 
 <template>
-  <main>
-    <LoginScreen />
-  </main>
+<main>
+  <LoginDialog />
+</main>
 </template>
 
+<style scoped>
+
+</style>

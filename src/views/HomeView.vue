@@ -1,10 +1,10 @@
 <script setup lang="ts">
-//import TheWelcome from '../components/TheWelcome.vue'
-import HelloWorld from '@/components/HelloWorld.vue'
+
+import NewWelcome from "@/components/NewWelcome.vue";
 </script>
 
 <template>
   <main>
-    <HelloWorld  msg="Hello World"/>
+    <NewWelcome />
   </main>
 </template>
