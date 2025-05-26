@@ -1,98 +1,129 @@
 <script setup lang="ts">
+import type { PropType } from 'vue'
+
 interface User {
-  id: string;
-  username: string;
-  tag: string;
-  avatar: string;
-  status?: "online" | "idle" | "dnd" | "offline";
-  role?: string;
+  id: string
+  username: string
+  tag: string
+  avatar: string
+  status?: 'online' | 'idle' | 'dnd' | 'offline'
+  role?: string
 }
 
-/**
- * Supply the component with an array of Discord‑like user objects.
- * All behaviour (fetching, filtering, real‑time status updates, etc.)
- * should be handled outside; this file focuses purely on layout + styles.
- */
-
-defineProps<{
-  users: User[];
-}>();
+const { user } = defineProps({
+  user: {
+    type: Object as PropType<User | null>,
+    default: null
+  }
+})
 </script>
 
 <template>
-  <div
-    class="w-full max-w-md bg-zinc-800 text-white rounded-2xl shadow-xl overflow-hidden select-none"
-  >
-    <!-- ── Header / Toolbar ─────────────────────────────────────────────── -->
-    <header class="flex items-center justify-between px-4 py-3 bg-zinc-900/80 backdrop-blur">
-      <h2 class="text-lg font-semibold tracking-wide">Discord Users</h2>
+  <div class="user-info-container">
+    <div v-if="!user" class="loading">Loading...</div>
+    <div v-else class="user-card">
+      <div class="avatar-wrapper">
+        <img :src="user.avatar" alt="Avatar" class="avatar" />
+        <span :class="['status-badge', user.status || 'offline']"></span>
+      </div>
 
-      <!-- slot for optional toolbar actions (search, menu, etc.) -->
-      <slot name="actions"></slot>
-    </header>
+      <h2 class="username">
+        {{ user.username }}<span class="tag">#{{ user.tag }}</span>
+      </h2>
 
-    <!-- ── Users list ───────────────────────────────────────────────────── -->
-    <ul class="divide-y divide-zinc-700 max-h-96 overflow-y-auto">
-      <li
-        v-for="user in users"
-        :key="user.id"
-        class="flex items-center gap-3 px-4 py-3 hover:bg-zinc-700/50 transition-colors"
-      >
-        <!-- Avatar + status ring -->
-        <span class="relative">
-          <img
-            :src="user.avatar"
-            :alt="`${user.username} avatar`"
-            class="w-10 h-10 rounded-full object-cover"
-          />
-          <span
-            v-if="user.status"
-            :class="[
-              'absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full ring-2 ring-zinc-800',
-              {
-                'bg-green-500': user.status === 'online',
-                'bg-amber-400': user.status === 'idle',
-                'bg-red-500': user.status === 'dnd',
-                'bg-zinc-500': user.status === 'offline',
-              },
-            ]"
-          />
-        </span>
+      <p class="id">ID: {{ user.id }}</p>
 
-        <!-- Username & discriminator tag -->
-        <div class="flex-1 min-w-0">
-          <p class="font-medium leading-none truncate">{{ user.username }}</p>
-          <p class="text-xs text-zinc-400">{{ user.tag }}</p>
-        </div>
-
-        <!-- Role badge (optional) -->
-        <span
-          v-if="user.role"
-          class="px-2 py-0.5 text-xs rounded-md bg-indigo-600/20 text-indigo-400 font-medium"
-        >
-          {{ user.role }}
-        </span>
-      </li>
-
-      <!-- Empty‑state visual -->
-      <li v-if="!users?.length" class="p-6 text-center text-zinc-500 text-sm">
-        No users to display
-      </li>
-    </ul>
+      <span v-if="user.role" class="role-pill">{{ user.role }}</span>
+    </div>
   </div>
 </template>
 
 <style scoped>
-/* Slim, rounded scrollbar to fit the modern Discord aesthetic */
-ul::-webkit-scrollbar {
-  width: 6px;
+.user-info-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 80vh;
 }
-ul::-webkit-scrollbar-track {
-  background: transparent;
+
+.user-card {
+  background: linear-gradient(145deg, #2c2f33 0%, #23272a 100%);
+  padding: 40px 32px;
+  border-radius: 16px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.45);
+  text-align: center;
+  max-width: 380px;
+  width: 100%;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
-ul::-webkit-scrollbar-thumb {
-  /* Fallback hex equivalent of Tailwind's zinc-600 to avoid theme issues */
-  background: #52525b;
+
+.user-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.55);
+}
+
+.avatar {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  border: 4px solid #2c2f33;
+  object-fit: cover;
+}
+
+.avatar-wrapper {
+  position: relative;
+  display: inline-block;
+  margin-bottom: 20px;
+}
+
+.status-badge {
+  position: absolute;
+  bottom: 6px;
+  right: 6px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 4px solid #2c2f33;
+}
+
+.status-badge.online  { background: #43b581; }
+.status-badge.idle    { background: #faa61a; }
+.status-badge.dnd     { background: #f04747; }
+.status-badge.offline { background: #747f8d; }
+
+.username {
+  font-size: 1.6em;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.tag {
+  color: #b9bbbe;
+  font-size: 0.65em;
+  font-weight: 400;
+  margin-left: 4px;
+}
+
+.id {
+  color: #b9bbbe;
+  margin-bottom: 16px;
+  font-size: 0.9em;
+}
+
+.role-pill {
+  display: inline-block;
+  background: #7289da;
+  padding: 6px 14px;
   border-radius: 9999px;
+  font-size: 0.8em;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.loading {
+  color: #b9bbbe;
+  font-size: 1.2em;
 }
 </style>
+

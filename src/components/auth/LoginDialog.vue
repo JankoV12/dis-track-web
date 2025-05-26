@@ -5,11 +5,17 @@
 import axios from 'axios';
 import { useRoute } from 'vue-router'
 import router from '@/router'
+import type { Ref } from 'vue'
 //import dot
 //import { onMounted } from 'vue';
 
 const route = useRoute();
 //const env
+
+const props = defineProps<{
+  isLoggedIn: Ref<boolean>;
+}>();
+const isLoggedIn = props.isLoggedIn;
 
 if(route.query.code !== undefined) {
   console.log(route.query.code);
@@ -50,6 +56,7 @@ async function login(code: string){
     else{
       localStorage.setItem('auth_token', r.data.access_token);
       localStorage.setItem('refresh_token', r.data.refresh_token);
+      isLoggedIn.value = true;
       router.push('/userInfo');
     }
   }

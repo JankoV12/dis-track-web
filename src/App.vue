@@ -1,5 +1,18 @@
 <script setup lang="ts">
-import { RouterLink, RouterView } from 'vue-router'
+import { RouterLink, RouterView } from 'vue-router';
+import { ref, onMounted } from 'vue';
+
+const isLoggedIn = ref(false);
+
+onMounted(() => {
+  isLoggedIn.value = localStorage.getItem('auth_token') !== null;
+});
+
+window.addEventListener('storage', (e) => {
+  if (e.key === 'auth_token') {
+    isLoggedIn.value = e.newValue !== null;
+  }
+});
 </script>
 
 <template>
@@ -10,12 +23,13 @@ import { RouterLink, RouterView } from 'vue-router'
         <RouterLink to="/about">About</RouterLink>
       </div>
       <div class="flex">
-        <RouterLink to="/login">Login</RouterLink>
+        <RouterLink v-if="!isLoggedIn" to="/login">Login</RouterLink>
+        <RouterLink v-else to="/userInfo">User Info</RouterLink>
       </div>
     </nav>
   </header>
 
-  <RouterView />
+  <RouterView :isLoggedIn="isLoggedIn" />
 </template>
 
 <style scoped>
