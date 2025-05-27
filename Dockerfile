@@ -16,7 +16,7 @@ FROM nginx:alpine
 
 # Override default nginx config to support Vue Router history mode
 RUN rm /etc/nginx/conf.d/default.conf && \
-    cat > /etc/nginx/conf.d/default.conf << 'EOF'
+    cat > /etc/nginx/conf.d/default.conf <<EOF
 server {
   listen       80;
   server_name  _;
