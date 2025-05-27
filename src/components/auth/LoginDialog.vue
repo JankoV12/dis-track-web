@@ -15,7 +15,7 @@ if (route.query.code !== undefined) {
 
 function dcAuth() {
   const redirectUri = `${window.location.protocol}//${window.location.host}${route.path}`
-  window.location.href = `https://discord.com/oauth2/authorize?client_id=${import.meta.env.VITE_DISCORD_CLIENT_ID}&response_type=code&redirect_uri=${encodeURIComponent(redirectUri)}&scope=identify`
+  window.location.href = `https://discord.com/oauth2/authorize?client_id=${import.meta.env.VITE_DISCORD_CLIENT_ID}&response_type=code&redirect_uri=${encodeURIComponent(redirectUri)}&scope=identify+guilds+guilds.members.read`
 }
 
 async function login(code: string) {
