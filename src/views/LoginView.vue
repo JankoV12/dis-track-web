@@ -2,15 +2,17 @@
 
 import LoginDialog from "@/components/auth/LoginDialog.vue";
 import router from '@/router'
-import {watch } from 'vue';
-import type { Ref } from 'vue';
+import { watch, toRef } from 'vue';
 
 const props = defineProps<{
-  isLoggedIn: Ref<boolean>;
+  isLoggedIn: boolean;
 }>();
-const isLoggedIn = props.isLoggedIn;
+const emit = defineEmits<{
+  (e: 'update:isLoggedIn', value: boolean): void;
+}>();
+const isLoggedInRef = toRef(props, 'isLoggedIn');
 
-watch(isLoggedIn, (loggedIn) => {
+watch(isLoggedInRef, (loggedIn) => {
   if (loggedIn) {
     router.push('/userInfo');
   } else {
@@ -21,7 +23,10 @@ watch(isLoggedIn, (loggedIn) => {
 
 <template>
 <main>
-  <LoginDialog :isLoggedIn="isLoggedIn" />
+  <LoginDialog
+    :isLoggedIn="props.isLoggedIn"
+    @update:isLoggedIn="val => emit('update:isLoggedIn', val)"
+  />
 </main>
 </template>
 

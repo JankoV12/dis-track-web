@@ -13,6 +13,13 @@ window.addEventListener('storage', (e) => {
     isLoggedIn.value = e.newValue !== null;
   }
 });
+
+function logout() {
+  localStorage.removeItem('auth_token');
+  localStorage.removeItem('refresh_token');
+  isLoggedIn.value = false;
+  window.location.href = '/';
+}
 </script>
 
 <template>
@@ -22,17 +29,30 @@ window.addEventListener('storage', (e) => {
         <RouterLink to="/">Home</RouterLink>
         <RouterLink to="/about">About</RouterLink>
       </div>
-      <div class="flex">
-        <RouterLink v-if="!isLoggedIn" to="/login">Login</RouterLink>
-        <RouterLink v-else to="/userInfo">User Info</RouterLink>
+      <div class="flex" v-if="!isLoggedIn">
+        <RouterLink to="/login">Login</RouterLink>
+      </div>
+      <div class="flex" v-else>
+        <RouterLink to="/userInfo">User Info</RouterLink>
+        <button class="logout" @click="logout">Log Out</button>
       </div>
     </nav>
   </header>
 
-  <RouterView :isLoggedIn="isLoggedIn" />
+  <RouterView v-slot="{ Component }">
+    <component
+      :is="Component"
+      :isLoggedIn="isLoggedIn"
+      @update:isLoggedIn="val => isLoggedIn = val"
+    />
+  </RouterView>
 </template>
 
 <style scoped>
+.logout{
+  color: red;
+}
+
 header {
   line-height: 1.5;
   max-height: 100vh;

@@ -2,15 +2,12 @@
 import axios from 'axios'
 import { useRoute } from 'vue-router'
 import router from '@/router'
-import { defineEmits } from 'vue'
 
 const route = useRoute()
-const props = defineProps<{
-  isLoggedIn: boolean;
-}>()
+
 const emit = defineEmits<{
-  (e: 'update:isLoggedIn', value: boolean): void
-}>()
+  (e: 'update:isLoggedIn', value: boolean): void;
+}>();
 
 if (route.query.code !== undefined) {
   login(route.query.code as string)
@@ -36,7 +33,7 @@ async function login(code: string) {
     if (r.status === 200) {
       localStorage.setItem('auth_token', r.data.access_token)
       localStorage.setItem('refresh_token', r.data.refresh_token)
-      emit('update:isLoggedIn', true)
+      emit('update:isLoggedIn', true);
       router.push('/userInfo')
     }
   } catch (error) {
@@ -57,5 +54,55 @@ async function login(code: string) {
 </template>
 
 <style scoped>
-/* ...styles unchanged... */
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.login-box {
+  background: #23272a;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.4);
+  text-align: center;
+  max-width: 400px;
+  width: 90%;
+}
+
+.discord-logo {
+  width: 80px;
+  margin-bottom: 20px;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+h1 {
+  color: #fff;
+  font-size: 2em;
+  margin-bottom: 10px;
+}
+
+p {
+  color: #b9bbbe;
+  font-size: 1.2em;
+  margin-bottom: 30px;
+}
+
+.login-button {
+  background-color: #5865F2;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  font-size: 1em;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.login-button:hover {
+  background-color: #4752c4;
+}
 </style>
