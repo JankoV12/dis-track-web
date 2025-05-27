@@ -43,7 +43,7 @@ function logout() {
     <component
       :is="Component"
       :isLoggedIn="isLoggedIn"
-      @update:isLoggedIn="val => isLoggedIn = val"
+      @update:isLoggedIn="(val: boolean) => isLoggedIn = val"
     />
   </RouterView>
 </template>
