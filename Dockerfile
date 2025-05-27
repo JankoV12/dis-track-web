@@ -22,7 +22,7 @@ server {
   server_name  _;
 
   # Only redirect to HTTPS if the original request was HTTP
-  if ($http_x_forwarded_proto = http) {
+  if (\$http_x_forwarded_proto = "http") {
     return 301 https://\$host\$request_uri;
   }
 
