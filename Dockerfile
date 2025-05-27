@@ -20,11 +20,17 @@ RUN rm /etc/nginx/conf.d/default.conf && \
 server {
   listen       80;
   server_name  _;
+
+  # Only redirect to HTTPS if the original request was HTTP
+  if ($http_x_forwarded_proto = 'http') {
+    return 301 https://\$host\$request_uri;
+  }
+
   root         /usr/share/nginx/html;
   index        index.html;
 
   location / {
-    try_files $uri $uri/ /index.html;
+    try_files \$uri \$uri/ /index.html;
   }
 }
 EOF
