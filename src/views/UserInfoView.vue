@@ -61,9 +61,7 @@ async function getServers(): Promise<Server[]> {
       owner: guild.owner,
     }))
   }).catch(() => { return [] })
-  const botServers = await axios.get<Server[]>('https://discord.com/api/v10/users/@me/guilds', {
-    headers: { Authorization: `Bot ${import.meta.env.VITE_DISCORD_BOT_TOKEN}` }
-  }).then(res => {
+  const botServers = await axios.get<Server[]>('/api/bot/guilds').then(res => {
     return res.data.map(guild => ({
       id: guild.id,
       name: guild.name,
