@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { defineProps } from 'vue'
+import { defineProps, computed } from 'vue'
+import { useRoute } from 'vue-router'
 import router from '@/router'
 
 interface Server {
@@ -11,6 +12,13 @@ interface Server {
 
 const props = defineProps<{ servers: Server[] }>()
 
+const route = useRoute()
+
+const selectedServer = computed(() => {
+  const id = route.params.guildId as string | undefined
+  return props.servers.find(s => s.id === id) || null
+})
+
 function openServer(id: string) {
   router.push(`/player/${id}`)
 }
@@ -19,7 +27,7 @@ function openServer(id: string) {
 <template>
   <details class="server-dropdown relative">
     <summary class="cursor-pointer flex items-center select-none">
-      <span class="mr-2">Servers</span>
+      <span class="mr-2">{{ selectedServer ? selectedServer.name : 'Servers' }}</span>
       <svg
         class="w-4 h-4"
         fill="none"
