@@ -29,6 +29,7 @@ const queue = ref<QueueItem[]>([])
 
 const newUrl = ref('')
 const username = ref('')
+const userId = ref('')
 
 async function loadUsername() {
   const token = localStorage.getItem('auth_token')
@@ -38,6 +39,7 @@ async function loadUsername() {
       headers: { Authorization: `Bearer ${token}` },
     })
     username.value = res.data.username
+    userId.value = res.data.id
   } catch (err) {
     console.error(err)
   }
@@ -84,6 +86,7 @@ async function addTrack() {
     await axios.post(`/api/queue/${guildId}/add`, {
       url: newUrl.value,
       requester: username.value || undefined,
+      requesterUId: userId.value || undefined,
     })
     newUrl.value = ''
     await loadData()
