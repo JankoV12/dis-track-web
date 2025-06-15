@@ -2,7 +2,7 @@
 import { RouterLink, RouterView } from 'vue-router';
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
-import ServerList from '@/components/ServerList.vue';
+import ServerDropdown from '@/components/ServerDropdown.vue';
 
 const isLoggedIn = ref(false);
 interface Server {
@@ -109,7 +109,7 @@ function updateLoggedIn(val: boolean) {
         <RouterLink to="/login">Login</RouterLink>
       </div>
       <div class="flex items-center" v-else>
-        <ServerList :servers="servers" />
+        <ServerDropdown :servers="servers" />
         <RouterLink to="/userInfo">User Info</RouterLink>
         <button class="logout" @click="logout">Log Out</button>
       </div>
