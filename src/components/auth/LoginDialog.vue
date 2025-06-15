@@ -6,8 +6,8 @@ import router from '@/router'
 const route = useRoute()
 
 const emit = defineEmits<{
-  (e: 'update:isLoggedIn', value: boolean): void;
-}>();
+  (e: 'update:isLoggedIn', value: boolean): void
+}>()
 
 if (route.query.code !== undefined) {
   login(route.query.code as string)
@@ -21,19 +21,21 @@ function dcAuth() {
 async function login(code: string) {
   const redirectUri = `${window.location.protocol}//${window.location.host}${route.path}`
   try {
-    const r = await axios.post('https://discord.com/api/v10/oauth2/token', {
+    const body = new URLSearchParams({
       client_id: import.meta.env.VITE_DISCORD_CLIENT_ID,
       client_secret: import.meta.env.VITE_DISCORD_CLIENT_SECRET,
       grant_type: 'authorization_code',
       code,
-      redirect_uri: redirectUri
-    }, {
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded', Accept: 'application/json' }
+      redirect_uri: redirectUri,
+    })
+
+    const r = await axios.post('https://discord.com/api/v10/oauth2/token', body.toString(), {
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded', Accept: 'application/json' },
     })
     if (r.status === 200) {
       localStorage.setItem('auth_token', r.data.access_token)
       localStorage.setItem('refresh_token', r.data.refresh_token)
-      emit('update:isLoggedIn', true);
+      emit('update:isLoggedIn', true)
       router.push('/userInfo')
     }
   } catch (error) {
@@ -92,7 +94,7 @@ p {
 }
 
 .login-button {
-  background-color: #5865F2;
+  background-color: #5865f2;
   color: white;
   border: none;
   padding: 12px 20px;
