@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { defineProps } from 'vue'
+import router from '@/router'
 
 interface Server {
   id: string
@@ -9,12 +10,21 @@ interface Server {
 }
 
 const props = defineProps<{ servers: Server[] }>()
+
+function openServer(id: string) {
+  router.push(`/player/${id}`)
+}
 </script>
 
 <template>
   <aside class="server-list">
     <ul>
-      <li v-for="server in props.servers" :key="server.id" class="server-item">
+      <li
+        v-for="server in props.servers"
+        :key="server.id"
+        class="server-item"
+        @click="openServer(server.id)"
+      >
         <div class="server-icon">
           <img v-if="server.icon" :src="server.icon" alt="server icon" />
         </div>
