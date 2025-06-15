@@ -9,9 +9,9 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-const CLIENT_ID = process.env.DISCORD_CLIENT_ID;
-const CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET;
-const BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
+const CLIENT_ID = process.env.VITE_DISCORD_CLIENT_ID;
+const CLIENT_SECRET = process.env.VITE_DISCORD_CLIENT_SECRET;
+const BOT_TOKEN = process.env.VITE_DISCORD_TOKEN;
 
 if (!CLIENT_ID || !CLIENT_SECRET || !BOT_TOKEN) {
   console.error('Discord credentials are not set');
