@@ -27,6 +27,9 @@ const guildId = route.params.guildId as string
 const currentTrack = ref<TrackMetadata | null>(null)
 const queue = ref<QueueItem[]>([])
 
+const newUrl = ref('')
+const newRequester = ref('')
+
 async function loadData() {
   try {
     const res = await axios.get(`/api/now-playing/${guildId}`)
@@ -60,6 +63,23 @@ async function stop() {
   await loadData()
 }
 
+async function addTrack() {
+  if (!newUrl.value) {
+    return
+  }
+  try {
+    await axios.post(`/api/queue/${guildId}/add`, {
+      url: newUrl.value,
+      requester: newRequester.value || undefined,
+    })
+    newUrl.value = ''
+    newRequester.value = ''
+    await loadData()
+  } catch (err) {
+    console.error(err)
+  }
+}
+
 onMounted(loadData)
 </script>
 
@@ -82,6 +102,20 @@ onMounted(loadData)
       <button @click="skip">Skip</button>
       <button @click="stop">Stop</button>
     </div>
+
+    <form class="add-form" @submit.prevent="addTrack">
+      <input
+        v-model="newUrl"
+        type="text"
+        placeholder="Song or playlist URL"
+      />
+      <input
+        v-model="newRequester"
+        type="text"
+        placeholder="Your name (optional)"
+      />
+      <button type="submit">Add</button>
+    </form>
 
     <div class="queue">
       <h4>Queue</h4>
@@ -118,6 +152,27 @@ onMounted(loadData)
   background: #2a2a2a;
   border: none;
   color: #e0e0e0;
+  cursor: pointer;
+}
+
+.add-form {
+  margin-top: 1rem;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.add-form input {
+  padding: 0.5rem;
+  background: #2a2a2a;
+  border: none;
+  color: #e0e0e0;
+}
+
+.add-form button {
+  padding: 0.5rem 1rem;
+  background: #4caf50;
+  border: none;
+  color: #fff;
   cursor: pointer;
 }
 
