@@ -1,16 +1,10 @@
-<script setup lang="ts">
-
-</script>
+<script setup lang="ts"></script>
 
 <template>
-  <h1>Welcome in the Dis Bot web companion app</h1>
+  <div class="text-center py-20">
+    <h1 class="text-4xl font-bold text-indigo-400 mb-4">Welcome to the Dis Bot companion app</h1>
+    <p class="text-gray-300">Manage your servers and play music with style!</p>
+  </div>
 </template>
 
-<style scoped>
-h1{
-  color: #42b983;
-  font-size: 2em;
-  text-align: center;
-  margin-top: 20px;
-}
-</style>
+<style scoped></style>

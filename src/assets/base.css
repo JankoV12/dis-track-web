@@ -61,12 +61,13 @@
 body {
   min-height: 100vh;
   color: var(--color-text);
-  background: var(--color-background);
+  background: linear-gradient(135deg, #1e293b, #0f172a);
   transition:
     color 0.5s,
     background-color 0.5s;
   line-height: 1.6;
   font-family:
+    'Poppins',
     Inter,
     -apple-system,
     BlinkMacSystemFont,
