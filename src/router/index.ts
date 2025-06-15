@@ -26,6 +26,11 @@ const router = createRouter({
       path: '/userInfo',
       name: 'userInfo',
       component: () => import('../views/UserInfoView.vue'),
+    },
+    {
+      path: '/player/:guildId',
+      name: 'player',
+      component: () => import('../views/PlayerView.vue'),
     }
   ],
 })
