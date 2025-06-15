@@ -28,7 +28,20 @@ const currentTrack = ref<TrackMetadata | null>(null)
 const queue = ref<QueueItem[]>([])
 
 const newUrl = ref('')
-const newRequester = ref('')
+const username = ref('')
+
+async function loadUsername() {
+  const token = localStorage.getItem('auth_token')
+  if (!token) return
+  try {
+    const res = await axios.get('https://discord.com/api/v10/users/@me', {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+    username.value = res.data.username
+  } catch (err) {
+    console.error(err)
+  }
+}
 
 async function loadData() {
   try {
@@ -70,17 +83,19 @@ async function addTrack() {
   try {
     await axios.post(`/api/queue/${guildId}/add`, {
       url: newUrl.value,
-      requester: newRequester.value || undefined,
+      requester: username.value || undefined,
     })
     newUrl.value = ''
-    newRequester.value = ''
     await loadData()
   } catch (err) {
     console.error(err)
   }
 }
 
-onMounted(loadData)
+onMounted(() => {
+  loadData()
+  loadUsername()
+})
 </script>
 
 <template>
@@ -108,11 +123,6 @@ onMounted(loadData)
         v-model="newUrl"
         type="text"
         placeholder="Song or playlist URL"
-      />
-      <input
-        v-model="newRequester"
-        type="text"
-        placeholder="Your name (optional)"
       />
       <button type="submit">Add</button>
     </form>

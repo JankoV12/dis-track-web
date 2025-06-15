@@ -43,4 +43,5 @@ npm run lint
 
 While viewing a server's player page, enter a song or playlist URL in the **Add**
  form and submit it to queue the track using the `/api/queue/{guildId}/add`
- endpoint. Optionally provide your name to mark who requested the song.
+ endpoint. The requester field is automatically filled with your Discord
+ username.
