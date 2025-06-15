@@ -3,6 +3,10 @@ import axios from 'axios'
 import { useRoute } from 'vue-router'
 import router from '@/router'
 
+defineProps<{
+  isLoggedIn: boolean
+}>()
+
 const route = useRoute()
 
 const emit = defineEmits<{
@@ -21,16 +25,9 @@ function dcAuth() {
 async function login(code: string) {
   const redirectUri = `${window.location.protocol}//${window.location.host}${route.path}`
   try {
-    const body = new URLSearchParams({
-      client_id: import.meta.env.VITE_DISCORD_CLIENT_ID,
-      client_secret: import.meta.env.VITE_DISCORD_CLIENT_SECRET,
-      grant_type: 'authorization_code',
+    const r = await axios.post('/api/login', {
       code,
-      redirect_uri: redirectUri,
-    })
-
-    const r = await axios.post('https://discord.com/api/v10/oauth2/token', body.toString(), {
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded', Accept: 'application/json' },
+      redirectUri,
     })
     if (r.status === 200) {
       localStorage.setItem('auth_token', r.data.access_token)

@@ -20,6 +20,10 @@ function logout() {
   isLoggedIn.value = false;
   window.location.href = '/';
 }
+
+function updateLoggedIn(val: boolean) {
+  isLoggedIn.value = val
+}
 </script>
 
 <template>
@@ -43,7 +47,7 @@ function logout() {
     <component
       :is="Component"
       :isLoggedIn="isLoggedIn"
-      @update:isLoggedIn="(val: boolean) => isLoggedIn = val"
+      @update:isLoggedIn="updateLoggedIn"
     />
   </RouterView>
 </template>

@@ -24,6 +24,7 @@ npm install
 
 ```sh
 npm run dev
+npm run server
 ```
 
 ### Type-Check, Compile and Minify for Production
