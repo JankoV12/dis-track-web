@@ -12,6 +12,7 @@ interface Server {
 const props = defineProps<{ servers: Server[] }>()
 
 function openServer(id: string) {
+  localStorage.setItem('selected_server', id)
   router.push(`/player/${id}`)
 }
 </script>

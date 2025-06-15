@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { defineProps, computed } from 'vue'
+import { defineProps, computed, ref, watch, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import router from '@/router'
 
@@ -14,12 +14,36 @@ const props = defineProps<{ servers: Server[] }>()
 
 const route = useRoute()
 
+const selectedId = ref<string | null>(null)
+
+onMounted(() => {
+  const fromRoute = route.params.guildId as string | undefined
+  if (fromRoute) {
+    selectedId.value = fromRoute
+    localStorage.setItem('selected_server', fromRoute)
+  } else {
+    const stored = localStorage.getItem('selected_server')
+    selectedId.value = stored
+  }
+})
+
+watch(
+  () => route.params.guildId,
+  newId => {
+    if (typeof newId === 'string') {
+      selectedId.value = newId
+      localStorage.setItem('selected_server', newId)
+    }
+  }
+)
+
 const selectedServer = computed(() => {
-  const id = route.params.guildId as string | undefined
-  return props.servers.find(s => s.id === id) || null
+  return props.servers.find(s => s.id === selectedId.value) || null
 })
 
 function openServer(id: string) {
+  selectedId.value = id
+  localStorage.setItem('selected_server', id)
   router.push(`/player/${id}`)
 }
 </script>
