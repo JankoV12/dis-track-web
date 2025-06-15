@@ -27,6 +27,24 @@ const guildId = route.params.guildId as string
 const currentTrack = ref<TrackMetadata | null>(null)
 const queue = ref<QueueItem[]>([])
 
+const newUrl = ref('')
+const username = ref('')
+const userId = ref('')
+
+async function loadUsername() {
+  const token = localStorage.getItem('auth_token')
+  if (!token) return
+  try {
+    const res = await axios.get('https://discord.com/api/v10/users/@me', {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+    username.value = res.data.username
+    userId.value = res.data.id
+  } catch (err) {
+    console.error(err)
+  }
+}
+
 async function loadData() {
   try {
     const res = await axios.get(`/api/now-playing/${guildId}`)
@@ -60,7 +78,27 @@ async function stop() {
   await loadData()
 }
 
-onMounted(loadData)
+async function addTrack() {
+  if (!newUrl.value) {
+    return
+  }
+  try {
+    await axios.post(`/api/queue/${guildId}/add`, {
+      url: newUrl.value,
+      requester: username.value || undefined,
+      requesterUId: userId.value || undefined,
+    })
+    newUrl.value = ''
+    await loadData()
+  } catch (err) {
+    console.error(err)
+  }
+}
+
+onMounted(() => {
+  loadData()
+  loadUsername()
+})
 </script>
 
 <template>
@@ -82,6 +120,15 @@ onMounted(loadData)
       <button @click="skip">Skip</button>
       <button @click="stop">Stop</button>
     </div>
+
+    <form class="add-form" @submit.prevent="addTrack">
+      <input
+        v-model="newUrl"
+        type="text"
+        placeholder="Song or playlist URL"
+      />
+      <button type="submit">Add</button>
+    </form>
 
     <div class="queue">
       <h4>Queue</h4>
@@ -118,6 +165,27 @@ onMounted(loadData)
   background: #2a2a2a;
   border: none;
   color: #e0e0e0;
+  cursor: pointer;
+}
+
+.add-form {
+  margin-top: 1rem;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.add-form input {
+  padding: 0.5rem;
+  background: #2a2a2a;
+  border: none;
+  color: #e0e0e0;
+}
+
+.add-form button {
+  padding: 0.5rem 1rem;
+  background: #4caf50;
+  border: none;
+  color: #fff;
   cursor: pointer;
 }
 
