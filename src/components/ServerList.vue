@@ -26,7 +26,7 @@ function openServer(id: string) {
         @click="openServer(server.id)"
       >
         <div class="server-icon">
-          <img v-if="server.icon" :src="server.icon" alt="server icon" />
+          <img :src="server.icon || '/default-server-icon.svg'" alt="server icon" />
         </div>
         <span class="server-name">{{ server.name }}</span>
       </li>
