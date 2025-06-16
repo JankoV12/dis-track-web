@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { RouterLink, RouterView } from 'vue-router';
 import { ref, onMounted } from 'vue';
-import axios from 'axios';
+import api from '@/api';
 import ServerDropdown from '@/components/ServerDropdown.vue';
 
 const isLoggedIn = ref(false);
@@ -14,7 +14,7 @@ interface Server {
 const servers = ref<Server[]>([]);
 
 async function getServers(): Promise<Server[]> {
-  const userServers = await axios
+  const userServers = await api
     .get<Server[]>('https://discord.com/api/v10/users/@me/guilds', {
       headers: { Authorization: `Bearer ${localStorage.getItem('auth_token')}` }
     })
@@ -32,7 +32,7 @@ async function getServers(): Promise<Server[]> {
       return [];
     });
 
-  const botServers = await axios
+  const botServers = await api
     .get<Server[]>('/api/bot/guilds')
     .then(res => {
       return res.data.map(guild => ({
