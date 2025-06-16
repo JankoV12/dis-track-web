@@ -50,10 +50,17 @@ function openServer(id: string) {
 
 <template>
   <details class="server-dropdown relative">
-    <summary class="cursor-pointer flex items-center select-none">
+    <summary
+      class="cursor-pointer flex items-center select-none bg-gray-800 px-2 py-1 rounded hover:bg-gray-700 text-white"
+    >
+      <img
+        :src="selectedServer?.icon || '/default-server-icon.svg'"
+        alt="server icon"
+        class="w-6 h-6 rounded-full mr-2"
+      />
       <span class="mr-2">{{ selectedServer ? selectedServer.name : 'Servers' }}</span>
       <svg
-        class="w-4 h-4"
+        class="w-4 h-4 ml-2"
         fill="none"
         stroke="currentColor"
         viewBox="0 0 24 24"
