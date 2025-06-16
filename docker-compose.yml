@@ -16,7 +16,7 @@ services:
       - ./:/app                # sync your local code
       - /app/node_modules     # avoid overwriting modules
     ports:
-      - "4001:5173"           # Vite’s dev server default port
-    command: npm run dev      # starts vite dev server
+      - "4000:5173"           # Vite’s dev server default port
+    command: npm run dev++      # starts vite dev server
     environment:
       - CHOKIDAR_USEPOLLING=true  # in case filesystem events need polling
