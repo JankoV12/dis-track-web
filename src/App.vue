@@ -104,6 +104,7 @@ function updateLoggedIn(val: boolean) {
       <div class="flex">
         <RouterLink to="/">Home</RouterLink>
         <RouterLink to="/about">About</RouterLink>
+        <RouterLink to="/invite">Invite</RouterLink>
       </div>
       <div class="flex" v-if="!isLoggedIn">
         <RouterLink to="/login">Login</RouterLink>
