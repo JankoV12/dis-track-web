@@ -24,5 +24,10 @@ export default defineConfig({
         changeOrigin: true,
       },
     },
+    allowedHosts:[
+      'localhost',
+      'disbot.slavetraders.tech',
+      '77.236.222.115'
+    ]
   },
 })
