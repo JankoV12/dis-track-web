@@ -27,6 +27,10 @@ npm run dev
 npm run server
 ```
 
+### Environment Variables
+
+Copy `.env.example` to `.env` and fill in your configuration. At minimum, set `VITE_API_BASE_URL` to the URL of the backend API.
+
 ### Type-Check, Compile and Minify for Production
 
 ```sh

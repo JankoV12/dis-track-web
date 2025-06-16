@@ -2,7 +2,7 @@
 import { ref, onMounted } from 'vue'
 import ServerList from '@/components/ServerList.vue'
 import UserInfoWindow from '@/components/UserInfoWindow.vue'
-import axios from 'axios'
+import api from '@/api'
 import router from '@/router'
 
 interface User {
@@ -31,7 +31,7 @@ onMounted(async () => {
     return
   }
   try {
-    const res = await axios.get('https://discord.com/api/v10/users/@me', {
+    const res = await api.get('https://discord.com/api/v10/users/@me', {
       headers: { Authorization: `Bearer ${token}` }
     })
     const d = res.data
@@ -51,7 +51,7 @@ onMounted(async () => {
 })
 
 async function getServers(): Promise<Server[]> {
-  const userServers = await axios.get<Server[]>('https://discord.com/api/v10/users/@me/guilds', {
+  const userServers = await api.get<Server[]>('https://discord.com/api/v10/users/@me/guilds', {
     headers: { Authorization: `Bearer ${localStorage.getItem('auth_token')}` }
   }).then(res => {
     return res.data.map(guild => ({
@@ -61,7 +61,7 @@ async function getServers(): Promise<Server[]> {
       owner: guild.owner,
     }))
   }).catch(() => { return [] })
-  const botServers = await axios.get<Server[]>('/api/bot/guilds').then(res => {
+  const botServers = await api.get<Server[]>('/api/bot/guilds').then(res => {
     return res.data.map(guild => ({
       id: guild.id,
       name: guild.name,

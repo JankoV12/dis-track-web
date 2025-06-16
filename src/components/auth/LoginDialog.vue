@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import axios from 'axios'
+import api from '@/api'
 import { useRoute } from 'vue-router'
 import router from '@/router'
 
@@ -25,7 +25,7 @@ function dcAuth() {
 async function login(code: string) {
   const redirectUri = `${window.location.protocol}//${window.location.host}${route.path}`
   try {
-    const r = await axios.post('/api/login', {
+    const r = await api.post('/api/login', {
       code,
       redirectUri,
     })

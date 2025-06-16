@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
-import axios from 'axios'
+import api from '@/api'
 
 interface TrackMetadata {
   url: string
@@ -35,7 +35,7 @@ async function loadUsername() {
   const token = localStorage.getItem('auth_token')
   if (!token) return
   try {
-    const res = await axios.get('https://discord.com/api/v10/users/@me', {
+    const res = await api.get('https://discord.com/api/v10/users/@me', {
       headers: { Authorization: `Bearer ${token}` },
     })
     username.value = res.data.username
@@ -47,14 +47,14 @@ async function loadUsername() {
 
 async function loadData() {
   try {
-    const res = await axios.get(`/api/now-playing/${guildId}`)
+    const res = await api.get(`/api/now-playing/${guildId}`)
     currentTrack.value = res.data
   } catch {
     currentTrack.value = null
   }
 
   try {
-    const q = await axios.get(`/api/queue/${guildId}`)
+    const q = await api.get(`/api/queue/${guildId}`)
     queue.value = q.data.tracks || []
   } catch {
     queue.value = []
@@ -62,19 +62,19 @@ async function loadData() {
 }
 
 async function pause() {
-  await axios.post(`/api/controls/${guildId}/pause`)
+  await api.post(`/api/controls/${guildId}/pause`)
   await loadData()
 }
 async function resume() {
-  await axios.post(`/api/controls/${guildId}/resume`)
+  await api.post(`/api/controls/${guildId}/resume`)
   await loadData()
 }
 async function skip() {
-  await axios.post(`/api/controls/${guildId}/skip`)
+  await api.post(`/api/controls/${guildId}/skip`)
   await loadData()
 }
 async function stop() {
-  await axios.post(`/api/controls/${guildId}/stop`)
+  await api.post(`/api/controls/${guildId}/stop`)
   await loadData()
 }
 
@@ -83,7 +83,7 @@ async function addTrack() {
     return
   }
   try {
-    await axios.post(`/api/queue/${guildId}/add`, {
+    await api.post(`/api/queue/${guildId}/add`, {
       url: newUrl.value,
       requester: username.value || undefined,
       requesterUId: userId.value || undefined,
