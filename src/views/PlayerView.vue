@@ -102,7 +102,9 @@ onMounted(() => {
 </script>
 
 <template>
-  <main class="player-window space-y-6 mx-auto max-w-xl">
+  <main
+    class="player-window space-y-6 mx-auto max-w-xl bg-gray-900 p-6 rounded-lg shadow-lg text-gray-200"
+  >
     <h2 class="text-3xl font-bold text-center mb-2">Player Controls</h2>
 
     <div
@@ -158,7 +160,10 @@ onMounted(() => {
       </button>
     </div>
 
-    <form class="add-form flex gap-2" @submit.prevent="addTrack">
+    <form
+      class="add-form flex gap-2 bg-gray-800 p-4 rounded-lg shadow-md"
+      @submit.prevent="addTrack"
+    >
       <input
         v-model="newUrl"
         type="text"
@@ -173,7 +178,7 @@ onMounted(() => {
       </button>
     </form>
 
-    <div class="queue mt-6">
+    <div class="queue mt-6 bg-gray-800 p-4 rounded-lg shadow">
       <h4 class="text-xl font-semibold mb-2">Queue</h4>
       <ul class="space-y-1">
         <li v-for="track in queue" :key="track.id">
@@ -185,10 +190,6 @@ onMounted(() => {
 </template>
 
 <style scoped>
-.player-window {
-  padding: 2rem;
-  color: #e0e0e0;
-}
 
 .thumb {
   width: 64px;
