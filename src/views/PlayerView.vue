@@ -102,37 +102,78 @@ onMounted(() => {
 </script>
 
 <template>
-  <main class="player-window">
-    <h2>Player Controls</h2>
-    <div v-if="currentTrack" class="now-playing">
-      <img :src="currentTrack.thumbnail" alt="thumbnail" class="thumb" />
+  <main class="player-window space-y-6 mx-auto max-w-xl">
+    <h2 class="text-3xl font-bold text-center mb-2">Player Controls</h2>
+
+    <div
+      v-if="currentTrack"
+      class="now-playing flex items-center bg-gray-800 rounded-lg p-4 shadow"
+    >
+      <img
+        :src="currentTrack.thumbnail"
+        alt="thumbnail"
+        class="thumb w-16 h-16 rounded mr-4"
+      />
       <div class="track-info">
-        <h3>{{ currentTrack.title }}</h3>
-        <p>{{ currentTrack.artist }}</p>
-        <p class="requester">Requested by: {{ currentTrack.requester }}</p>
+        <h3 class="text-lg font-semibold">{{ currentTrack.title }}</h3>
+        <p class="text-sm text-gray-300">{{ currentTrack.artist }}</p>
+        <p class="requester text-xs text-gray-400">
+          Requested by: {{ currentTrack.requester }}
+        </p>
       </div>
     </div>
-    <div v-else class="now-playing">No track playing</div>
-
-    <div class="controls">
-      <button @click="pause">Pause</button>
-      <button @click="resume">Resume</button>
-      <button @click="skip">Skip</button>
-      <button @click="stop">Stop</button>
+    <div
+      v-else
+      class="now-playing bg-gray-800 rounded p-4 text-center shadow"
+    >
+      No track playing
     </div>
 
-    <form class="add-form" @submit.prevent="addTrack">
+    <div class="controls flex flex-wrap gap-2 justify-center">
+      <button
+        class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded text-white"
+        @click="pause"
+      >
+        Pause
+      </button>
+      <button
+        class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded text-white"
+        @click="resume"
+      >
+        Resume
+      </button>
+      <button
+        class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded text-white"
+        @click="skip"
+      >
+        Skip
+      </button>
+      <button
+        class="px-4 py-2 bg-red-600 hover:bg-red-700 rounded text-white"
+        @click="stop"
+      >
+        Stop
+      </button>
+    </div>
+
+    <form class="add-form flex gap-2" @submit.prevent="addTrack">
       <input
         v-model="newUrl"
         type="text"
         placeholder="Song or playlist URL"
+        class="flex-1 p-2 rounded bg-gray-700 text-gray-200 placeholder-gray-400"
       />
-      <button type="submit">Add</button>
+      <button
+        type="submit"
+        class="px-4 py-2 bg-green-600 hover:bg-green-700 rounded text-white"
+      >
+        Add
+      </button>
     </form>
 
-    <div class="queue">
-      <h4>Queue</h4>
-      <ul>
+    <div class="queue mt-6">
+      <h4 class="text-xl font-semibold mb-2">Queue</h4>
+      <ul class="space-y-1">
         <li v-for="track in queue" :key="track.id">
           {{ track.title }} - {{ track.author }}
         </li>
@@ -147,46 +188,9 @@ onMounted(() => {
   color: #e0e0e0;
 }
 
-.now-playing {
-  display: flex;
-  align-items: center;
-  margin-bottom: 1rem;
-}
-
 .thumb {
   width: 64px;
   height: 64px;
-  margin-right: 1rem;
-}
-
-.controls button {
-  margin-right: 0.5rem;
-  padding: 0.5rem 1rem;
-  background: #2a2a2a;
-  border: none;
-  color: #e0e0e0;
-  cursor: pointer;
-}
-
-.add-form {
-  margin-top: 1rem;
-  display: flex;
-  gap: 0.5rem;
-}
-
-.add-form input {
-  padding: 0.5rem;
-  background: #2a2a2a;
-  border: none;
-  color: #e0e0e0;
-}
-
-.add-form button {
-  padding: 0.5rem 1rem;
-  background: #4caf50;
-  border: none;
-  color: #fff;
-  cursor: pointer;
 }
 
 .queue ul {
