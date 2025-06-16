@@ -60,7 +60,7 @@ function openServer(id: string) {
       />
       <span class="mr-2">{{ selectedServer ? selectedServer.name : 'Servers' }}</span>
       <svg
-        class="w-4 h-4"
+        class="w-4 h-4 ml-2"
         fill="none"
         stroke="currentColor"
         viewBox="0 0 24 24"
