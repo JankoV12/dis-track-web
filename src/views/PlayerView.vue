@@ -129,7 +129,9 @@ onMounted(() => {
       No track playing
     </div>
 
-    <div class="controls flex flex-wrap gap-2 justify-center">
+    <div
+      class="controls flex flex-wrap justify-center gap-4 bg-gray-800 p-4 rounded-lg shadow-md mx-auto w-fit"
+    >
       <button
         class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded text-white"
         @click="pause"
