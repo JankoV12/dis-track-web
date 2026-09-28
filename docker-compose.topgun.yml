@@ -1,0 +1,17 @@
+services:
+  web:
+    build:
+      context: .
+      args:
+        VITE_DISCORD_CLIENT_ID: "1371932098851639357"
+    restart: unless-stopped
+    expose:
+      - "80"
+    networks:
+      proxy-public:
+        aliases:
+          - dis-track-web
+
+networks:
+  proxy-public:
+    external: true

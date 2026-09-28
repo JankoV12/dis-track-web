@@ -1,118 +1,60 @@
-<script setup lang=ts>
-import { ref, onMounted } from 'vue'
-import ServerList from '@/components/ServerList.vue'
-import UserInfoWindow from '@/components/UserInfoWindow.vue'
-import api from '@/api'
-import router from '@/router'
-
-interface User {
-  id: string
-  username: string
-  tag: string
-  avatar: string
-  status?: "online" | "idle" | "dnd" | "offline"
-  role?: string
-}
-
-interface Server {
-  id: string
-  name: string
-  icon: string | null
-  owner: boolean
-}
-
-const currentUser = ref<User | null>(null)
-const servers = ref<Server[]>([])
-
-onMounted(async () => {
-  const token = localStorage.getItem('auth_token')
-  if (!token) {
-    router.push('/')
-    return
-  }
-  try {
-    const res = await api.get('https://discord.com/api/v10/users/@me', {
-      headers: { Authorization: `Bearer ${token}` }
-    })
-    const d = res.data
-    currentUser.value = {
-      id: d.id,
-      username: d.username,
-      tag: d.discriminator,
-      avatar: `https://cdn.discordapp.com/avatars/${d.id}/${d.avatar}.png`,
-      status: 'online',
-      role: 'member'
-    }
-  } catch {
-    router.push('/')
-    return
-  }
-  servers.value = await getServers()
+<script setup lang="ts">
+import { onMounted } from 'vue'
+import { RouterLink } from 'vue-router'
+import Icon from '@/components/AppIcon.vue'
+import { useSession } from '@/composables/useSession'
+const { user, servers, loading, error, load } = useSession()
+onMounted(() => {
+  void load()
 })
-
-async function getServers(): Promise<Server[]> {
-  const userServers = await api.get<Server[]>('https://discord.com/api/v10/users/@me/guilds', {
-    headers: { Authorization: `Bearer ${localStorage.getItem('auth_token')}` }
-  }).then(res => {
-    return res.data.map(guild => ({
-      id: guild.id,
-      name: guild.name,
-      icon: guild.icon ? `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.png` : null,
-      owner: guild.owner,
-    }))
-  }).catch(() => { return [] })
-  const botServers = await api.get<Server[]>('/api/bot/guilds').then(res => {
-    return res.data.map(guild => ({
-      id: guild.id,
-      name: guild.name,
-      icon: guild.icon ? `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.png` : null,
-      owner: guild.owner,
-    }))
-  }).catch(() => { return [] })
-  const sameServers: Server[] = []
-  for (const server of userServers) {
-    const botServer = botServers.find(s => s.id === server.id)
-    if (botServer) {
-      sameServers.push({
-        ...server,
-        icon: server.icon || botServer.icon,
-        owner: server.owner || botServer.owner
-      })
-    }
-  }
-  return sameServers;
-}
 </script>
-
 <template>
-  <main>
-    <div class="user-info-container">
-      <UserInfoWindow :user="currentUser" />
-      <ServerList :servers="servers" />
+  <main class="page">
+    <div class="page-heading">
+      <div>
+        <p class="eyebrow">PICK YOUR ROOM</p>
+        <h1>Your servers</h1>
+        <p class="muted">
+          {{
+            user
+              ? `Hey ${user.username}. Where are we listening?`
+              : 'Connect Discord to find your shared listening rooms.'
+          }}
+        </p>
+      </div>
+      <button class="button secondary" @click="load(true)" :disabled="loading">
+        <Icon name="refresh" :size="17" />Refresh
+      </button>
+    </div>
+    <div v-if="error" class="alert error" role="alert">{{ error }}</div>
+    <div v-if="loading" class="server-grid">
+      <div v-for="n in 3" :key="n" class="skeleton server-skeleton" />
+    </div>
+    <div v-else-if="!user" class="empty-state panel">
+      <Icon name="headphones" :size="40" />
+      <h2>Your music starts here.</h2>
+      <p>Sign in to see servers you share with Dis Track.</p>
+      <RouterLink class="button primary" to="/login">Connect Discord</RouterLink>
+    </div>
+    <div v-else-if="!servers.length" class="empty-state panel">
+      <Icon name="grid" :size="40" />
+      <h2>No shared servers yet</h2>
+      <p>Invite the bot to a Discord server, then refresh this page.</p>
+      <RouterLink class="button primary" to="/invite">Invite the bot</RouterLink>
+    </div>
+    <div v-else class="server-grid">
+      <RouterLink
+        v-for="server in servers"
+        :key="server.id"
+        :to="`/player/${server.id}`"
+        class="server-card"
+        ><img v-if="server.icon" :src="server.icon" alt="" /><span v-else class="server-monogram">{{
+          server.name.slice(0, 2)
+        }}</span
+        ><span class="eyebrow">DISCORD SERVER</span>
+        <h2>{{ server.name }}</h2>
+        <span class="server-open">Open player<Icon name="arrow" :size="20" /></span
+      ></RouterLink>
     </div>
   </main>
 </template>
-
-<style scoped>
-main {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  width: 100%;
-  margin: 0;
-  background-color: #121212;
-  color: #e0e0e0;
-}
-.user-info-container {
-  display: flex;
-  flex-direction: row;
-  gap: 2rem;
-  align-items: flex-start;
-  background: #1e1e1e;
-  color: #e0e0e0;
-  padding: 2rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
-}
-</style>

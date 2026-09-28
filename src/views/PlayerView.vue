@@ -1,203 +1,250 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
-import api from '@/api'
-
-interface TrackMetadata {
-  url: string
-  title: string
-  artist: string
-  duration: string
-  requester: string
-  thumbnail: string
-}
-
-interface QueueItem {
-  id: number
-  title: string
-  author: string
-  thumbnail: string
-  duration: number
-  url: string
-}
-
-const route = useRoute()
-const guildId = route.params.guildId as string
-
-const currentTrack = ref<TrackMetadata | null>(null)
-const queue = ref<QueueItem[]>([])
-
-const newUrl = ref('')
-const username = ref('')
-const userId = ref('')
-
-async function loadUsername() {
-  const token = localStorage.getItem('auth_token')
-  if (!token) return
-  try {
-    const res = await api.get('https://discord.com/api/v10/users/@me', {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-    username.value = res.data.username
-    userId.value = res.data.id
-  } catch (err) {
-    console.error(err)
-  }
-}
-
-async function loadData() {
-  try {
-    const res = await api.get(`/api/now-playing/${guildId}`)
-    currentTrack.value = res.data
-  } catch {
-    currentTrack.value = null
-  }
-
-  try {
-    const q = await api.get(`/api/queue/${guildId}`)
-    queue.value = q.data.tracks || []
-  } catch {
-    queue.value = []
-  }
-}
-
-async function pause() {
-  await api.post(`/api/controls/${guildId}/pause`)
-  await loadData()
-}
-async function resume() {
-  await api.post(`/api/controls/${guildId}/resume`)
-  await loadData()
-}
-async function skip() {
-  await api.post(`/api/controls/${guildId}/skip`)
-  await loadData()
-}
-async function stop() {
-  await api.post(`/api/controls/${guildId}/stop`)
-  await loadData()
-}
-
-async function addTrack() {
-  if (!newUrl.value) {
-    return
-  }
-  try {
-    await api.post(`/api/queue/${guildId}/add`, {
-      url: newUrl.value,
-      requester: username.value || undefined,
-      requesterUId: userId.value || undefined,
-    })
-    newUrl.value = ''
-    await loadData()
-  } catch (err) {
-    console.error(err)
-  }
-}
-
-onMounted(() => {
-  loadData()
-  loadUsername()
-})
+import Icon from '@/components/AppIcon.vue'
+import { usePlayer } from '@/composables/usePlayer'
+const {
+  current,
+  tracks,
+  count,
+  filteredCount,
+  page,
+  pages,
+  pageSize,
+  search,
+  state,
+  connected,
+  loading,
+  refreshing,
+  busy,
+  error,
+  notice,
+  newUrl,
+  lastUpdated,
+  serverName,
+  refresh,
+  control,
+  addTrack,
+} = usePlayer()
 </script>
-
 <template>
-  <main
-    class="player-window space-y-6 mx-auto max-w-xl bg-gray-900 p-6 rounded-lg shadow-lg text-gray-200"
-  >
-    <h2 class="text-3xl font-bold text-center mb-2">Player Controls</h2>
-
-    <div
-      v-if="currentTrack"
-      class="now-playing flex items-center bg-gray-800 rounded-lg p-4 shadow"
-    >
-      <img
-        :src="currentTrack.thumbnail"
-        alt="thumbnail"
-        class="thumb w-16 h-16 rounded mr-4"
-      />
-      <div class="track-info">
-        <h3 class="text-lg font-semibold">{{ currentTrack.title }}</h3>
-        <p class="text-sm text-gray-300">{{ currentTrack.artist }}</p>
-        <p class="requester text-xs text-gray-400">
-          Requested by: {{ currentTrack.requester }}
-        </p>
+  <main class="page player-page">
+    <div class="page-heading">
+      <div>
+        <p class="eyebrow">YOUR LISTENING ROOM</p>
+        <h1>{{ serverName }}</h1>
+        <p class="muted">Good music. Shared company.</p>
+      </div>
+      <div class="connection-chip">
+        <span :class="['status-dot', { online: connected }]" />{{
+          loading ? 'Connecting…' : connected ? 'Voice connected' : 'Not in voice'
+        }}
       </div>
     </div>
-    <div
-      v-else
-      class="now-playing bg-gray-800 rounded p-4 text-center shadow"
-    >
-      No track playing
+    <div v-if="error" class="alert error" role="alert">
+      {{ error }} <button @click="refresh" :disabled="refreshing">Retry</button>
     </div>
-
-    <div
-      class="controls flex flex-wrap justify-center gap-4 bg-gray-800 p-4 rounded-lg shadow-md mx-auto w-fit"
-    >
-      <button
-        class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded text-white"
-        @click="pause"
-      >
-        Pause
-      </button>
-      <button
-        class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded text-white"
-        @click="resume"
-      >
-        Resume
-      </button>
-      <button
-        class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded text-white"
-        @click="skip"
-      >
-        Skip
-      </button>
-      <button
-        class="px-4 py-2 bg-red-600 hover:bg-red-700 rounded text-white"
-        @click="stop"
-      >
-        Stop
-      </button>
+    <div v-if="notice" class="alert success" role="status">
+      <Icon name="check" :size="17" />{{ notice }}
     </div>
-
-    <form
-      class="add-form flex gap-2 bg-gray-800 p-4 rounded-lg shadow-md"
-      @submit.prevent="addTrack"
-    >
-      <input
-        v-model="newUrl"
-        type="text"
-        placeholder="Song or playlist URL"
-        class="flex-1 p-2 rounded bg-gray-700 text-gray-200 placeholder-gray-400"
-      />
-      <button
-        type="submit"
-        class="px-4 py-2 bg-green-600 hover:bg-green-700 rounded text-white"
-      >
-        Add
-      </button>
-    </form>
-
-    <div class="queue mt-6 bg-gray-800 p-4 rounded-lg shadow">
-      <h4 class="text-xl font-semibold mb-2">Queue</h4>
-      <ul class="space-y-1">
-        <li v-for="track in queue" :key="track.id">
-          {{ track.title }} - {{ track.author }}
-        </li>
-      </ul>
+    <div class="player-grid">
+      <section class="now-card" aria-labelledby="now-title">
+        <div class="card-label">
+          <span id="now-title">NOW PLAYING</span
+          ><span class="tiny-state">{{ loading ? 'Loading' : state }}</span>
+        </div>
+        <div class="cover">
+          <img
+            v-if="current?.thumbnail"
+            :src="current.thumbnail"
+            alt="Current track artwork"
+            @error="($event.target as HTMLImageElement).style.display = 'none'"
+          />
+          <div v-else class="cover-placeholder"><Icon name="headphones" :size="80" /></div>
+          <div class="cover-caption">DIS / TRACK</div>
+        </div>
+        <template v-if="loading"
+          ><div class="skeleton title-skeleton" />
+          <div class="skeleton subtitle-skeleton"
+        /></template>
+        <template v-else-if="current"
+          ><h2 class="track-title">
+            <a :href="current.url" target="_blank" rel="noopener noreferrer">{{ current.title }}</a>
+          </h2>
+          <p class="track-artist">{{ current.artist || 'Artist unavailable' }}</p>
+          <p class="track-detail">
+            {{
+              current.duration && current.duration !== 'Unknown' ? current.duration + ' · ' : ''
+            }}Added by {{ current.requester || 'a listener' }}
+          </p></template
+        >
+        <template v-else
+          ><h2 class="track-title">The room is yours.</h2>
+          <p class="track-artist">Add something worth sharing.</p>
+          <p class="track-detail">Join a Discord voice channel to start.</p></template
+        >
+        <div class="playback-controls">
+          <button
+            class="icon-button"
+            title="Stop and clear queue"
+            aria-label="Stop playback and clear queue"
+            :disabled="!connected || !!busy"
+            @click="control('stop')"
+          >
+            <Icon name="stop" /></button
+          ><button
+            class="play-button"
+            :aria-label="state === 'paused' ? 'Resume playback' : 'Pause playback'"
+            :disabled="!['playing', 'paused'].includes(state) || !!busy"
+            @click="control(state === 'paused' ? 'resume' : 'pause')"
+          >
+            <Icon :name="state === 'paused' ? 'play' : 'pause'" :size="26" /></button
+          ><button
+            class="icon-button"
+            title="Skip track"
+            aria-label="Skip current track"
+            :disabled="!current || !!busy"
+            @click="control('skip')"
+          >
+            <Icon name="skip" />
+          </button>
+        </div>
+        <p class="sync-label">
+          {{
+            refreshing
+              ? 'Updating…'
+              : lastUpdated
+                ? 'Live · refreshes every 5 seconds'
+                : 'Waiting for player data'
+          }}
+        </p>
+      </section>
+      <div class="queue-column">
+        <section class="add-card">
+          <div>
+            <h2>Add to the mix</h2>
+            <p class="muted">A track, an album, or the whole playlist.</p>
+          </div>
+          <form @submit.prevent="addTrack">
+            <label class="sr-only" for="track-url">YouTube or Spotify link</label
+            ><input
+              id="track-url"
+              v-model="newUrl"
+              placeholder="Paste a YouTube or Spotify link"
+              autocomplete="off"
+              :disabled="busy === 'add'"
+            /><button class="button primary" :disabled="!newUrl.trim() || !!busy">
+              <Icon name="plus" :size="18" />{{ busy === 'add' ? 'Adding…' : 'Add music' }}
+            </button>
+          </form>
+          <p class="form-hint">
+            Join your server’s voice channel first. Playlist imports may take a moment.
+          </p>
+        </section>
+        <section class="queue-card" aria-labelledby="queue-title" :aria-busy="loading">
+          <div class="queue-heading">
+            <div>
+              <p class="eyebrow">COMING UP</p>
+              <h2 id="queue-title">
+                The queue <span class="count-badge">{{ loading ? '—' : count }}</span>
+              </h2>
+            </div>
+            <button
+              class="button secondary"
+              :disabled="count < 2 || !!busy || loading"
+              @click="control('shuffle')"
+            >
+              <Icon name="shuffle" :size="17" />{{ busy === 'shuffle' ? 'Shuffling…' : 'Shuffle' }}
+            </button>
+          </div>
+          <div class="queue-search">
+            <Icon name="search" :size="18" /><label class="sr-only" for="queue-search"
+              >Search queue</label
+            ><input
+              id="queue-search"
+              v-model="search"
+              placeholder="Find a song, artist or listener…"
+            /><button v-if="search" class="text-button" @click="search = ''">Clear</button>
+          </div>
+          <div v-if="loading" class="queue-loading" aria-label="Loading queue">
+            <div v-for="i in 6" :key="i" class="skeleton queue-skeleton" />
+          </div>
+          <div v-else-if="!tracks.length" class="empty-state">
+            <Icon :name="search ? 'search' : 'music'" :size="34" />
+            <h3>{{ search ? 'No matching tracks' : 'A little quiet in here' }}</h3>
+            <p>
+              {{
+                search
+                  ? 'Try a different title, artist or link.'
+                  : 'Add your first track or playlist above.'
+              }}
+            </p>
+          </div>
+          <div v-else class="queue-scroll">
+            <table class="queue-table">
+              <thead>
+                <tr>
+                  <th scope="col" class="position-cell">#</th>
+                  <th scope="col">TRACK</th>
+                  <th scope="col" class="requester-cell">ADDED BY</th>
+                  <th scope="col" class="duration-cell">TIME</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="track in tracks" :key="track.id">
+                  <td class="position-cell">{{ track.position }}</td>
+                  <td>
+                    <div class="queue-track">
+                      <img v-if="track.thumbnail" :src="track.thumbnail" alt="" loading="lazy" />
+                      <div v-else class="small-cover"><Icon name="music" :size="18" /></div>
+                      <div class="queue-track-text">
+                        <a
+                          :href="track.url"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          :title="track.title || track.url"
+                          >{{
+                            track.title ||
+                            (track.metadataPending
+                              ? 'Loading track details…'
+                              : 'Track details unavailable')
+                          }}</a
+                        ><span>{{ track.author || track.url }}</span>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="requester-cell">{{ track.requester || '—' }}</td>
+                  <td class="duration-cell">{{ track.duration || '—' }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="queue-footer">
+            <span
+              >{{ filteredCount ? page * pageSize + 1 : 0 }}–{{
+                Math.min((page + 1) * pageSize, filteredCount)
+              }}
+              of {{ filteredCount }}{{ search ? ' matches' : ' tracks' }}</span
+            >
+            <div class="pagination">
+              <button
+                class="icon-button"
+                aria-label="Previous page"
+                :disabled="page === 0 || loading"
+                @click="page--"
+              >
+                <Icon name="chevron" class="rotate" :size="17" /></button
+              ><span>{{ page + 1 }} / {{ pages }}</span
+              ><button
+                class="icon-button"
+                aria-label="Next page"
+                :disabled="page + 1 >= pages || loading"
+                @click="page++"
+              >
+                <Icon name="chevron" :size="17" />
+              </button>
+            </div>
+          </div>
+        </section>
+      </div>
     </div>
   </main>
 </template>
-
-<style scoped>
-
-.thumb {
-  width: 64px;
-  height: 64px;
-}
-
-.queue ul {
-  list-style: none;
-  padding: 0;
-}
-</style>

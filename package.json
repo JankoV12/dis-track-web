@@ -12,7 +12,8 @@
     "type-check": "vue-tsc --build",
     "lint": "eslint . --fix",
     "format": "prettier --write src/",
-    "server": "node server/index.js"
+    "server": "node server/index.js",
+    "test:player": "node tests/player.smoke.cjs"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.7",
@@ -35,6 +36,7 @@
     "eslint-plugin-vue": "~10.0.0",
     "jiti": "^2.4.2",
     "npm-run-all2": "^7.0.2",
+    "playwright": "^1.62.1",
     "postcss": "^8.5.3",
     "prettier": "3.5.3",
     "tailwindcss": "^4.1.7",

@@ -1,44 +1,50 @@
 <script setup lang="ts">
+import { ref } from 'vue'
 import api from '@/api'
 import { useRoute } from 'vue-router'
 import router from '@/router'
 
-defineProps<{
-  isLoggedIn: boolean
-}>()
-
+defineProps<{ isLoggedIn: boolean }>()
 const route = useRoute()
-
-const emit = defineEmits<{
-  (e: 'update:isLoggedIn', value: boolean): void
-}>()
-
-if (route.query.code !== undefined) {
-  login(route.query.code as string)
-}
-
+const busy = ref(false)
+const error = ref('')
+const emit = defineEmits<{ (e: 'update:isLoggedIn', value: boolean): void }>()
+const stateKey = 'discord_oauth_state'
 function dcAuth() {
-  const redirectUri = `${window.location.protocol}//${window.location.host}${route.path}`
-  window.location.href = `https://discord.com/oauth2/authorize?client_id=${import.meta.env.VITE_DISCORD_CLIENT_ID}&response_type=code&redirect_uri=${encodeURIComponent(redirectUri)}&scope=identify+guilds+guilds.members.read`
+  const state = crypto.randomUUID()
+  sessionStorage.setItem(stateKey, state)
+  const params = new URLSearchParams({
+    client_id: import.meta.env.VITE_DISCORD_CLIENT_ID,
+    response_type: 'code',
+    redirect_uri: `${window.location.origin}/login`,
+    scope: 'identify guilds guilds.members.read',
+    state,
+  })
+  window.location.assign(`https://discord.com/oauth2/authorize?${params}`)
 }
-
 async function login(code: string) {
-  const redirectUri = `${window.location.protocol}//${window.location.host}${route.path}`
+  const expected = sessionStorage.getItem(stateKey)
+  sessionStorage.removeItem(stateKey)
+  const returned = route.query.state
+  await router.replace('/login')
+  if (!expected || returned !== expected) {
+    error.value = 'This sign-in attempt expired. Please connect again.'
+    return
+  }
+  busy.value = true
   try {
-    const r = await api.post('/api/login', {
-      code,
-      redirectUri,
-    })
-    if (r.status === 200) {
-      localStorage.setItem('auth_token', r.data.access_token)
-      localStorage.setItem('refresh_token', r.data.refresh_token)
-      emit('update:isLoggedIn', true)
-      router.push('/userInfo')
-    }
-  } catch (error) {
-    console.error(error)
+    const r = await api.post('/api/login', { code, redirectUri: `${window.location.origin}/login` })
+    localStorage.setItem('auth_token', r.data.access_token)
+    localStorage.setItem('refresh_token', r.data.refresh_token)
+    emit('update:isLoggedIn', true)
+  } catch {
+    error.value = 'Discord sign-in failed. Please try again.'
+  } finally {
+    busy.value = false
   }
 }
+if (typeof route.query.code === 'string') void login(route.query.code)
+else if (route.query.error) error.value = 'Discord sign-in was cancelled. You can try again.'
 </script>
 
 <template>
@@ -47,7 +53,10 @@ async function login(code: string) {
       <img src="/Discord-Symbol-Blurple.png" alt="Discord Logo" class="discord-logo" />
       <h1>Welcome</h1>
       <p>Sign in with your Discord account to continue</p>
-      <button @click="dcAuth" class="login-button">Login with Discord</button>
+      <p v-if="error" class="alert error" role="alert">{{ error }}</p>
+      <button @click="dcAuth" class="login-button" :disabled="busy">
+        {{ busy ? 'Connecting…' : 'Connect with Discord' }}
+      </button>
     </div>
   </main>
 </template>

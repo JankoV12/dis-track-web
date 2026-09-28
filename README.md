@@ -49,3 +49,43 @@ While viewing a server's player page, enter a song or playlist URL in the **Add*
  form and submit it to queue the track using the `/api/queue/{guildId}/add`
  endpoint. The requester field is automatically filled with your Discord
  username.
+
+
+## Topgun deployment
+
+Directory: `/home/janko/dis-track-web`. Run:
+
+```sh
+docker compose -f docker-compose.topgun.yml up --build -d
+```
+
+Attach Traefik to `proxy-public` and route `disbot.slavetraders.tech` to
+`http://dis-track-web:80`. The frontend proxies `/api/` to `http://dis-track:3000`
+on the same Docker network. No host port is published. The public Discord client
+ID is compiled into the frontend; client secrets and bot tokens stay in the backend.
+
+Configure `CLIENT_ID` and `CLIENT_SECRET` in `/home/janko/dis-track/.env` and
+register `https://disbot.slavetraders.tech/login` as the Discord OAuth redirect URI.
+
+## Player and queue
+
+The player refreshes every five seconds while visible. Queue requests use 50-item
+pages and debounced search; the interface retains the last known data on network
+errors. Shuffle changes upcoming songs only. Track links open their source in a
+new tab. Playback/add failures are shown inline rather than silently clearing data.
+
+### Browser regression check
+
+Install Google Chrome, then run the following in separate terminals:
+
+```sh
+npm run build
+npm run preview -- --host 127.0.0.1 --port 4173
+npm run test:player
+```
+
+The test intercepts API calls with a 1,000-song fixture; it does not modify a live
+Discord queue. It checks pagination, search, shuffle, pause, add failures,
+network recovery, server switching, and mobile overflow. On Node 25, use
+`NODE_OPTIONS=--no-experimental-webstorage npm run build` for the older Vue devtools
+plugin. Production builds use Node 24 in Docker.

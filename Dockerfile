@@ -1,43 +1,15 @@
-# 1) Build stage
 FROM node:24-alpine AS build
-
 WORKDIR /app
-
-# Install deps based on package.json
 COPY package*.json ./
-RUN npm install
-
-# Copy source & build
+RUN npm ci
 COPY . .
+ARG VITE_DISCORD_CLIENT_ID
+ENV VITE_DISCORD_CLIENT_ID=$VITE_DISCORD_CLIENT_ID
+ENV VITE_API_BASE_URL=/
 RUN npm run build
 
-# 2) Production stage
 FROM nginx:alpine
-
-# Override default nginx config to support Vue Router history mode
-RUN rm /etc/nginx/conf.d/default.conf && \
-    cat > /etc/nginx/conf.d/default.conf <<EOF
-server {
-  listen       80;
-  server_name  _;
-
-  # Only redirect to HTTPS if the original request was HTTP
-  if (\$http_x_forwarded_proto = "http") {
-    return 301 https://\$host\$request_uri;
-  }
-
-  root         /usr/share/nginx/html;
-  index        index.html;
-
-  location / {
-    try_files \$uri \$uri/ /index.html;
-  }
-}
-EOF
-
-# Copy built static assets from “build” stage
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /app/dist /usr/share/nginx/html
-
-# Expose port 80 and run nginx
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
